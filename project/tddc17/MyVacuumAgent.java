@@ -66,9 +66,7 @@ class MyAgentProgram implements AgentProgram {
     	// This example agent program will update the internal agent state while only moving forward.
     	// START HERE - code below should be modified!
     	    	
-    	System.out.println("x=" + state.agent_x_position);
-    	System.out.println("y=" + state.agent_y_position);
-    	System.out.println("dir=" + state.agent_direction);
+
     	
 		
 	    iterationCounter--;
@@ -77,35 +75,54 @@ class MyAgentProgram implements AgentProgram {
 	    	return NoOpAction.NO_OP;
 
 	    mapCurrentPosition(percept);
-	    
-	    state.updatePosition((DynamicPercept)percept);
 	    state.printWorldDebug();
+	    state.updatePosition((DynamicPercept)percept);
 	    
-	    if(state.checkIfDone()){
+	    
+    	System.out.println("x=" + state.agent_x_position);
+    	System.out.println("y=" + state.agent_y_position);
+    	System.out.println("dir=" + state.agent_direction);
+	    
+    	return checkIfGoHome(percept);
+	    
+		
+	}
+	
+	private Action checkIfGoHome(Percept percept){
+		if(state.goHome){
 	    	 return state.goHome((DynamicPercept)percept);
-	    }else return chooseNextAction(percept);
-
+	    }else {
+	    	if(state.checkIfDone()){
+	    		state.goHome = true;
+	    		if(state.agent_direction == 1){
+	    			System.out.println("go home left");
+	    			state.rotateAgentLeft();
+	    			state.agent_last_action=state.ACTION_TURN_LEFT;
+	    			return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+	    		}else if(state.agent_direction == 2){
+	    			System.out.println("go home right");
+	    			state.rotateAgentRight();
+	    			state.agent_last_action=state.ACTION_TURN_RIGHT;
+	    			return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
+	    		}else 
+	    			System.out.println("go home forward");
+	    			state.agent_last_action=state.ACTION_MOVE_FORWARD;
+	    			return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+	    	}
+	    	return chooseNextAction(percept);
+	    }
 	}
 
 	
     //This piece of code moves the "player" into a new position
     // Next action selection based on the percept value
 	private Action chooseNextAction(Percept percept) {
-		DynamicPercept p = (DynamicPercept) percept;
-	    Boolean bump = (Boolean)p.getAttribute("bump");
-	    Boolean dirt = (Boolean)p.getAttribute("dirt");
-	    Boolean home = (Boolean)p.getAttribute("home");
-	    if(state.checkIfDone()){
-	    	//state.goHome(p);
-	    	//state.agent_direction = state.WEST;
-	    	System.out.println("Done");
-	    }
 	    
 	    if(state.agent_last_action==state.ACTION_TURN_RIGHT){
 	    	state.agent_last_action=state.ACTION_MOVE_FORWARD;
     		return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
 	    }
-	    if (dirt)
+	    if (getAttribute((DynamicPercept) percept, "dirt"))
 	    {
 	    	System.out.println("DIRT -> choosing SUCK action!");
 	    	state.agent_last_action=state.ACTION_SUCK;
@@ -113,7 +130,7 @@ class MyAgentProgram implements AgentProgram {
 	    } 
 	    else
 	    {
-	    	if (bump)
+	    	if (getAttribute((DynamicPercept) percept, "bump"))
 	    	{
 	    		System.out.println("bump");
 	    		state.agent_last_action=state.ACTION_TURN_RIGHT;
@@ -135,27 +152,22 @@ class MyAgentProgram implements AgentProgram {
 	    }
 		
 	}
+	
+	private boolean getAttribute(DynamicPercept p, String attribute){
+		return (Boolean)p.getAttribute(attribute);
+	}
 
 
 	private void mapCurrentPosition(Percept percept) {
 		if(state.agent_x_position == 1 && state.agent_y_position == 1){
 			return;
 		}
-		DynamicPercept p = (DynamicPercept) percept;
-	    Boolean bump = (Boolean)p.getAttribute("bump");
-	    Boolean dirt = (Boolean)p.getAttribute("dirt");
-	    Boolean home = (Boolean)p.getAttribute("home");
-	    //System.out.println("percept: " + p);
 	    
 	    // State update based on the percept value and the last action
-	    
 	    //bump value is false, and it caises the bug, needs fixing
 	    System.out.println("agent x position" + state.agent_x_position);
-	    if (bump) {
-	    	// go to previous position
-	    	//resetCorrectPosition();
-	    	System.out.print("bump");
-	    	System.out.println("Agent direction: "+state.agent_direction);
+	    if (getAttribute((DynamicPercept) percept, "bump")) {
+	    	
 			switch (state.agent_direction) {
 			case MyAgentState.NORTH:
 				state.updateWorld(state.agent_x_position,state.agent_y_position-1,state.WALL);
@@ -169,21 +181,13 @@ class MyAgentProgram implements AgentProgram {
 			case MyAgentState.WEST:
 				state.updateWorld(state.agent_x_position-1,state.agent_y_position,state.WALL);
 				break;
+				
 			}
-	    }else if (dirt)
+	    }else if (getAttribute((DynamicPercept) percept, "dirt"))
 	    	state.updateWorld(state.agent_x_position,state.agent_y_position,state.DIRT);
 	    else
-	    	System.out.print("clear");
 	    	state.updateWorld(state.agent_x_position,state.agent_y_position,state.CLEAR);
 	    
-		
-	}
-
-
-	private void resetCorrectPosition() {
-		List<Integer> lastCoordinates = state.getLastPosition();
-		state.agent_x_position = lastCoordinates.get(0);
-		state.agent_y_position = lastCoordinates.get(1);
 		
 	}
 }

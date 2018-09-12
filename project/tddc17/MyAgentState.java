@@ -6,6 +6,7 @@ import java.util.List;
 
 import aima.core.agent.Action;
 import aima.core.agent.impl.DynamicPercept;
+import aima.core.agent.impl.NoOpAction;
 import aima.core.environment.liuvacuum.LIUVacuumEnvironment;
 
 class MyAgentState {
@@ -21,7 +22,7 @@ class MyAgentState {
 	final int ACTION_TURN_RIGHT 	= 2;
 	final int ACTION_TURN_LEFT 		= 3;
 	final int ACTION_SUCK	 		= 4;
-	final int ACTION_ROTATE_RIGHT 	= 5;
+	public boolean goHome			= false;
 	
 	public int agent_x_position = 1;
 	public int agent_y_position = 1;
@@ -42,12 +43,6 @@ class MyAgentState {
 		agent_last_action = ACTION_NONE;
 	}
 	
-	//rotates the agent either 90,180 or 270 degrees
-	public int directionRotator(int direction, int factor){
-		return (direction+factor)%3;
-		
-	}
-	
 	public boolean checkIfDone(){
 		boolean isDone = false;
 		
@@ -61,16 +56,22 @@ class MyAgentState {
 		return isDone;
 	}
 	
+	public void rotateAgentToDirection(int direction){
+		
+	}
+	
 	public void rotateAgentRight(){
 		if(agent_direction<3){
 			agent_direction++;
 		}else agent_direction = 0;
+		System.out.println("agent rotated to: "+ agent_direction);
 	}
 	
 	public void rotateAgentLeft(){
 		if(agent_direction>0){
 			agent_direction--;
 		}else agent_direction = 3;
+		System.out.println("agent rotated to: "+ agent_direction);
 	}
 	
 	public List getNextPosition(int direction){
@@ -99,9 +100,7 @@ class MyAgentState {
 	
 	public boolean haveVisitedLocation(List<Integer> list){
 		
-		return world[list.get(0)][list.get(1)] == CLEAR || world[list.get(0)][list.get(1)] == HOME;
-		//return savedPositions.contains(list);
-		
+		return world[list.get(0)][list.get(1)] == CLEAR || world[list.get(0)][list.get(1)] == HOME || world[list.get(0)][list.get(1)] == DIRT || world[list.get(0)][list.get(1)] == WALL;
 	}
 	
 	public List<Integer> getLastPosition(){
@@ -112,7 +111,7 @@ class MyAgentState {
 	// Based on the last action and the received percept updates the x & y agent position
 	public void updatePosition(DynamicPercept p) {
 		Boolean bump = (Boolean)p.getAttribute("bump");
-
+		
 		System.out.println(" x: "+ agent_x_position +" y: "+agent_y_position);
 		System.out.println("action: "+agent_last_action);
 		
@@ -127,10 +126,25 @@ class MyAgentState {
 	
 	public Action goHome(DynamicPercept p){
 		Boolean bump = (Boolean)p.getAttribute("bump");
-		if(agent_direction != 3){
-			agent_direction = 3;
-			return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-		}else return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+		Boolean home = (Boolean)p.getAttribute("home");
+		
+		if(home){
+			return NoOpAction.NO_OP;
+		}else 
+		if(bump){
+			if(agent_direction == 0){
+				this.rotateAgentLeft();
+				agent_last_action=ACTION_TURN_LEFT;
+				return LIUVacuumEnvironment.ACTION_TURN_LEFT;
+			}else{
+				this.rotateAgentRight();
+				agent_last_action=ACTION_TURN_RIGHT;
+				return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
+			}
+		}else{
+			agent_last_action=ACTION_MOVE_FORWARD;
+			return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
+		}
 		
 	}
 	
@@ -159,6 +173,7 @@ class MyAgentState {
 	
 	private void addNewPosition(int x, int y) {
 		List<Integer> list = new ArrayList<Integer>();
+		System.out.println("add x: "+ x + " add y: "+ y +" list len: "+(savedPositions.size()+1));
 		list.add(x);
 		list.add(y);
 		savedPositions.add(list);
