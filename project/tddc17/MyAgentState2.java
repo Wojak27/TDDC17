@@ -9,7 +9,7 @@ import aima.core.agent.impl.DynamicPercept;
 import aima.core.agent.impl.NoOpAction;
 import aima.core.environment.liuvacuum.LIUVacuumEnvironment;
 
-class MyAgentState {
+class MyAgentState2 {
 	public int[][] world = new int[30][30];
 	public int initialized = 0;
 	final int UNKNOWN 	= 0;
@@ -35,7 +35,7 @@ class MyAgentState {
 	public int agent_direction = EAST;
 	private ArrayList<List<Integer>> savedPositions = new ArrayList();
 	
-	MyAgentState(){
+	MyAgentState2(){
 		for (int i=0; i < world.length; i++)
 			for (int j=0; j < world[i].length ; j++)
 				world[i][j] = UNKNOWN;
@@ -46,16 +46,76 @@ class MyAgentState {
 	public boolean checkIfDone(){
 		boolean isDone = false;
 		
-		if(world[agent_x_position+1][agent_y_position] == CLEAR && 
-				world[agent_x_position-1][agent_y_position] == CLEAR && 
-				world[agent_x_position][agent_y_position+1] == CLEAR && 
-				world[agent_x_position][agent_y_position-1] == CLEAR){
+		if(world[agent_x_position+1][agent_y_position] != UNKNOWN && 
+				world[agent_x_position-1][agent_y_position] != UNKNOWN && 
+				world[agent_x_position][agent_y_position+1] != UNKNOWN && 
+				world[agent_x_position][agent_y_position-1]!= UNKNOWN){
 			isDone = true;
 		}
 		
 		return isDone;
 	}
-
+	
+	private int[] findWorldBounds(){
+		int worldHeight = 0;
+		int worldWidth = 0;
+		for (int i = 1; i < world.length; i++){
+			int currentWidth = 0;
+			for (int j = 1; j < world[i].length; j++){
+				if (world[i][j] == WALL && worldWidth < j){
+					currentWidth = j;
+				}
+			}
+			if(currentWidth != 0){
+				worldWidth = currentWidth;
+				worldHeight = i;
+			}
+		}
+		System.out.println("width: "+worldWidth+" height: "+worldHeight);
+		int[] bounds = {worldWidth, worldHeight};
+		return bounds;
+	}
+	
+	public boolean worldHasUnknowns(){
+		int[] bounds = findWorldBounds();
+		int width = bounds[0];
+		int height = bounds[1];
+		System.out.println("World width: " + width);
+		System.out.println("World height: " + height);
+		for (int i = 0; i < width; i++){
+			for (int j = 0; j < height; j++){
+				if (world[i][j] == UNKNOWN){
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	public boolean isLeftSquareUnexplored(){
+		boolean isEmpty = false;
+		int squareToLeft = 0;
+		switch(agent_direction){
+			case MyAgentState.EAST: 
+				squareToLeft = world[agent_x_position][agent_y_position-1];
+				break;
+			case MyAgentState.WEST: 
+				squareToLeft = world[agent_x_position][agent_y_position+1];
+				break;
+			case MyAgentState.NORTH: 
+				squareToLeft = world[agent_x_position-1][agent_y_position];
+				break;
+			case MyAgentState.SOUTH: 
+				squareToLeft = world[agent_x_position+1][agent_y_position];
+				break;
+				
+		}
+		if(squareToLeft == 0){
+			return true;
+		}
+		
+		return isEmpty;
+	}
 	
 	public void rotateAgentToDirection(int direction){
 		

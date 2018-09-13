@@ -1,6 +1,5 @@
 package tddc17;
 
-
 import aima.core.environment.liuvacuum.*;
 import aima.core.agent.Action;
 import aima.core.agent.AgentProgram;
@@ -12,14 +11,14 @@ import java.util.List;
 import java.util.Random;
 
 
-class MyAgentProgram implements AgentProgram {
+class MyAgentProgram2 implements AgentProgram {
 
-	private int initialRandomActions = 15;
+	private int initialRandomActions = 100;
 	private Random random_generator = new Random();
 	
 	// Here you can define your variables!
 	public int iterationCounter = 1000;
-	public MyAgentState2 state = new MyAgentState2();
+	public MyAgentState state = new MyAgentState();
 	
 	// moves the Agent to a random start position
 	// uses percepts to update the Agent position - only the position, other percepts are ignored
@@ -93,9 +92,6 @@ class MyAgentProgram implements AgentProgram {
 	    	 return state.goHome((DynamicPercept)percept);
 	    }else {
 	    	if(state.checkIfDone()){
-	    		if (state.worldHasUnknowns()){
-	    			 moveToRandomStartPosition((DynamicPercept)percept);
-	    		}
 	    		state.goHome = true;
 	    		if(state.agent_direction == 1){
 	    			System.out.println("go home left");
@@ -112,10 +108,6 @@ class MyAgentProgram implements AgentProgram {
 	    			state.agent_last_action=state.ACTION_MOVE_FORWARD;
 	    			return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
 	    	}
-	    	/*else if(state.isLeftSquareUnexplored() && state.agent_last_action != state.ACTION_TURN_LEFT){
-	    		state.agent_last_action=state.ACTION_TURN_LEFT;
-    			return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-	    	}*/
 	    	return chooseNextAction(percept);
 	    }
 	}
@@ -125,7 +117,7 @@ class MyAgentProgram implements AgentProgram {
     // Next action selection based on the percept value
 	private Action chooseNextAction(Percept percept) {
 	    
-	    if(state.agent_last_action==state.ACTION_TURN_RIGHT || state.agent_last_action==state.ACTION_TURN_LEFT){
+	    if(state.agent_last_action==state.ACTION_TURN_RIGHT){
 	    	state.agent_last_action=state.ACTION_MOVE_FORWARD;
     		return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
 	    }
@@ -199,8 +191,8 @@ class MyAgentProgram implements AgentProgram {
 	}
 }
 
-public class MyVacuumAgent extends AbstractAgent {
-    public MyVacuumAgent() {
-    	super(new MyAgentProgram());
+public class MyAgentForObsticles extends AbstractAgent {
+    public MyAgentForObsticles() {
+    	super(new MyAgentProgram2());
 	}
 }
