@@ -14,61 +14,18 @@ import java.util.Random;
 
 class MyAgentProgram implements AgentProgram {
 
-	private int initialRandomActions = 15;
+	private int initialRandomActions = 10000;
 	private Random random_generator = new Random();
 	
 	// Here you can define your variables!
-	public int iterationCounter = 1000;
+	public int iterationCounter = 10000;
 	public MyAgentState2 state = new MyAgentState2();
-	
-	// moves the Agent to a random start position
-	// uses percepts to update the Agent position - only the position, other percepts are ignored
-	// returns a random action
-	private Action moveToRandomStartPosition(DynamicPercept percept) {
-		int action = random_generator.nextInt(6);
-		initialRandomActions--;
-		System.out.println("update pos");
-		state.updatePosition(percept);
-		if(action==0) {
-		    state.agent_direction = ((state.agent_direction-1) % 4);
-		    if (state.agent_direction < 0){ 
-		    	state.agent_direction +=4;
-		    }
-		    state.agent_last_action = state.ACTION_TURN_LEFT;
-			return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-		} else if (action==1) {
-			state.agent_direction = ((state.agent_direction+1) % 4);
-		    state.agent_last_action = state.ACTION_TURN_RIGHT;
-		    return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-		} 
-		state.agent_last_action=state.ACTION_MOVE_FORWARD;
-		return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
-	}
+	private ArrayList<Action> actionMemory = new ArrayList();
 
-	
 	@Override
 	public Action execute(Percept percept) {
 		
-		System.out.println("execute");
-		// DO NOT REMOVE this if condition!!!
-    	/*if (initialRandomActions>0) {
-    		return moveToRandomStartPosition((DynamicPercept) percept);
-    	} 
-    	else if (initialRandomActions==0) {
-    		// process percept for the last step of the initial random actions
-    		initialRandomActions--;
-    		state.updatePosition((DynamicPercept) percept);
-			System.out.println("Processing percepts after the last execution of moveToRandomStartPosition()");
-			state.agent_last_action=state.ACTION_SUCK;
-	    	return LIUVacuumEnvironment.ACTION_SUCK;
-    	}*/
-		
-    	// This example agent program will update the internal agent state while only moving forward.
-    	// START HERE - code below should be modified!
-    	    	
-
-    	
-		
+		System.out.println("execute");		
 	    iterationCounter--;
 	    
 	    if (iterationCounter==0)
@@ -90,33 +47,11 @@ class MyAgentProgram implements AgentProgram {
 	
 	private Action checkIfGoHome(Percept percept){
 		if(state.goHome){
+			System.out.println("Going home");
 	    	 return state.goHome((DynamicPercept)percept);
 	    }else {
-	    	if(state.checkIfDone()){
-	    		if (state.worldHasUnknowns()){
-	    			 moveToRandomStartPosition((DynamicPercept)percept);
-	    		}
-	    		state.goHome = true;
-	    		if(state.agent_direction == 1){
-	    			System.out.println("go home left");
-	    			state.rotateAgentLeft();
-	    			state.agent_last_action=state.ACTION_TURN_LEFT;
-	    			return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-	    		}else if(state.agent_direction == 2){
-	    			System.out.println("go home right");
-	    			state.rotateAgentRight();
-	    			state.agent_last_action=state.ACTION_TURN_RIGHT;
-	    			return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-	    		}else 
-	    			System.out.println("go home forward");
-	    			state.agent_last_action=state.ACTION_MOVE_FORWARD;
-	    			return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
-	    	}
-	    	/*else if(state.isLeftSquareUnexplored() && state.agent_last_action != state.ACTION_TURN_LEFT){
-	    		state.agent_last_action=state.ACTION_TURN_LEFT;
-    			return LIUVacuumEnvironment.ACTION_TURN_LEFT;
-	    	}*/
-	    	return chooseNextAction(percept);
+	    	//state.goHome = state.worldHasUnknowns();
+	    	return chooseNextAction(percept);	    	
 	    }
 	}
 
@@ -125,40 +60,41 @@ class MyAgentProgram implements AgentProgram {
     // Next action selection based on the percept value
 	private Action chooseNextAction(Percept percept) {
 	    
-	    if(state.agent_last_action==state.ACTION_TURN_RIGHT || state.agent_last_action==state.ACTION_TURN_LEFT){
-	    	state.agent_last_action=state.ACTION_MOVE_FORWARD;
-    		return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
-	    }
-	    if (getAttribute((DynamicPercept) percept, "dirt"))
-	    {
-	    	System.out.println("DIRT -> choosing SUCK action!");
-	    	state.agent_last_action=state.ACTION_SUCK;
-	    	return LIUVacuumEnvironment.ACTION_SUCK;
-	    } 
-	    else
-	    {
-	    	if (getAttribute((DynamicPercept) percept, "bump"))
-	    	{
-	    		System.out.println("bump");
-	    		state.agent_last_action=state.ACTION_TURN_RIGHT;
-	    		state.rotateAgentRight();
-	    		return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-	    	}
-	    	else
-	    	{
-	    		List<Integer> nextPos = state.getNextPosition(state.agent_direction);
-	    		if(state.haveVisitedLocation(nextPos)){
-	    			state.agent_last_action=state.ACTION_TURN_RIGHT;
-		    		state.rotateAgentRight();
-		    		return LIUVacuumEnvironment.ACTION_TURN_RIGHT;
-	    		}
-	    		System.out.println("forward");
-	    		state.agent_last_action=state.ACTION_MOVE_FORWARD;
-	    		return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
-	    	}
-	    }
+		//deal with dirt
+		if (getAttribute((DynamicPercept) percept, "dirt")){
+	    	return state.suck();
+	    	
+	    //deal with bump
+	    }else if (getAttribute((DynamicPercept) percept, "bump")){
+    		return surroundingsUnexplored();
+    		
+    	//deal with turns
+    	}else if(!state.checkIfSurraundingsUnexplored()){
+    			return surroundingsUnexplored();
+		
+    	} else return surroundingsExplored();
+
+	    	//return state.agent_last_action != MyAgentState2.ACTION_MOVE_FORWARD ? state.moveAgentForward() : state.rotateAgentRandomDirection();
+	}
+	
+	private Action surroundingsUnexplored(){
+		
+		if(state.isNextSquareUnexplored(MyAgentState2.FRONT_SQUARE) && state.agent_last_action != MyAgentState2.ACTION_MOVE_FORWARD)
+    		return state.moveAgentForward();
+	    else if (state.isNextSquareUnexplored(MyAgentState2.LEFT_SQUARE))
+    		return state.rotateAgentLeft();
+	    else return state.rotateAgentRight();
+	}
+	
+	private Action surroundingsExplored(){
+		
+		if(state.isNextSquareWalkable(MyAgentState2.FRONT_SQUARE))
+			return state.moveAgentForward();
+		else
+			return state.agent_last_action != MyAgentState2.ACTION_MOVE_FORWARD ? state.moveAgentForward() : state.rotateAgentRandomDirection();
 		
 	}
+
 	
 	private boolean getAttribute(DynamicPercept p, String attribute){
 		return (Boolean)p.getAttribute(attribute);
