@@ -54,11 +54,16 @@ public class CustomGraphSearch implements SearchObject {
 				System.out.println("Returning FAILURE");
 				return path; //return failure?
 			}
+			//BFS = false, DFS = true
 			
 			//choose a leaf node and remove it from the frontier -- HERE IS WHERE BFS OR DFS COMES IN
 			// --- currently is a FIFO implementation that doesn't care about logic.
-			currentNode = frontier.peekAtFront();
-			frontier.removeFirst();
+			currentNode = insertFront ? frontier.peekAtBack(): frontier.peekAtFront();
+			if(insertFront){
+				frontier.removeLast();
+			}else{
+				frontier.removeFirst();
+			}
 			
 			//if the node contains a goal state then return the corresponding solution
 			if (currentNode.getState().equals(goalState)){
@@ -79,7 +84,9 @@ public class CustomGraphSearch implements SearchObject {
 			for (GridPos position : reachableStates){
 				SearchNode neighbourNode = new SearchNode(new GridPos(position), currentNode); //create the new node with a parent.
 				if (!(explored.contains(neighbourNode) || frontier.contains(neighbourNode))){
+					
 					frontier.addNodeToBack(neighbourNode);
+					
 				}
 			}
 		}
