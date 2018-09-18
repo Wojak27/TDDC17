@@ -16,6 +16,7 @@ public class CustomGraphSearch implements SearchObject {
 	private NodeQueue frontier;
 	protected ArrayList<SearchNode> path;
 	private boolean insertFront;
+	//private ArrayList<GridPos> reachableStates; 
 	
 	private SearchNode currentNode;
 
@@ -50,6 +51,7 @@ public class CustomGraphSearch implements SearchObject {
 			
 			//if the frontier is empty return failure
 			if (frontier.isEmpty()){
+				System.out.println("Returning FAILURE");
 				return path; //return failure?
 			}
 			
@@ -57,48 +59,30 @@ public class CustomGraphSearch implements SearchObject {
 			// --- currently is a FIFO implementation that doesn't care about logic.
 			currentNode = frontier.peekAtFront();
 			frontier.removeFirst();
-			path.add(currentNode);
 			
 			//if the node contains a goal state then return the corresponding solution
 			if (currentNode.getState().equals(goalState)){
 				//we found the goal
+				while (currentNode.getParent() != null){
+					path.add(currentNode);
+					currentNode = currentNode.getParent();
+				}
 				return path;
 			}
-			
 			//add the node to the explored set
 			explored.add(currentNode);
 			
+			//all the positions we can reach from current position
+			ArrayList<GridPos> reachableStates = p.getReachableStatesFrom(currentNode.getState());
+			
 			//expand the chosen node, adding the resulting nodes to the frontier - ONLY IF NOT IN THE FRONTIER OR IN EXPLORED SET
-			GridPos currentPosition = currentNode.getState();
-			int currentX = currentPosition.getX();
-			int currentY = currentPosition.getY();
-			//check the neighbouring nodes if they are a) not explored, b) not already added (and possibly c) free?)
-			for (int xPos = currentX-1; xPos < currentX+2; currentX++){
-				for (int yPos = currentY-1; yPos < currentY+2; currentY++){
-					if (xPos == currentX  && yPos == currentY){
-						break; //we started from this position and we don't want to work with it again.
-					} else {
-						SearchNode neighbourNode = new SearchNode(new GridPos(xPos, yPos));
-						//Explored is a hashSet so it should work without problems. Frontier on the other hand is a custom-built class using a Linked List. Will it use equals() or not?
-						if (!(explored.contains(neighbourNode) || (frontier.contains(neighbourNode)))){ //Do we need to care about if the neighbouring node is a wall?
-							frontier.addNodeToBack(neighbourNode);
-						}
-					}
+			for (GridPos position : reachableStates){
+				SearchNode neighbourNode = new SearchNode(new GridPos(position), currentNode); //create the new node with a parent.
+				if (!(explored.contains(neighbourNode) || frontier.contains(neighbourNode))){
+					frontier.addNodeToBack(neighbourNode);
 				}
 			}
 		}
-		
-		// Implement this!
-		//System.out.println("Implement CustomGraphSearch.java!");
-		
-		//This thing below is wrong.
-		/*for (int i = 0; i < 50; i++){
-			for (int j = 0; j < 50; j++){
-				frontier.addNodeToBack(new SearchNode(new GridPos(i, j), frontier.peekAtBack())); //This adds all nodes to the "unexplored" list. But ignores all logic.
-				//It also adds the start node again.
-			}
-		}*/
-		
 		/* Some hints:
 		 * -Read early part of chapter 3 in the book!
 		 * -You are free to change anything how you wish as long as the program runs, but some structure is given to help you.
@@ -123,7 +107,7 @@ public class CustomGraphSearch implements SearchObject {
 		 *  When the goal is found, the path to be returned can be found by: path = node.getPathFromRoot();
 		 */
 		/* Note: Returning an empty path signals that no path exists */
-		//return path;
+		
 	}
 
 	/*
