@@ -1,26 +1,15 @@
 package tddc17;
 
-
-import aima.core.environment.liuvacuum.*;
 import aima.core.agent.Action;
 import aima.core.agent.AgentProgram;
 import aima.core.agent.Percept;
 import aima.core.agent.impl.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
-
 class MyAgentProgram implements AgentProgram {
-
-	private int initialRandomActions = 10000;
-	private Random random_generator = new Random();
 	
 	// Here you can define your variables!
 	public int iterationCounter = 10000;
 	public MyAgentState2 state = new MyAgentState2();
-	private ArrayList<Action> actionMemory = new ArrayList();
 
 	@Override
 	public Action execute(Percept percept) {
@@ -41,8 +30,6 @@ class MyAgentProgram implements AgentProgram {
     	System.out.println("dir=" + state.agent_direction);
 	    
     	return checkIfGoHome(percept);
-	    
-		
 	}
 	
 	private Action checkIfGoHome(Percept percept){

@@ -171,7 +171,6 @@ class MyAgentState2 {
 		if(agent_direction>0){
 			agent_direction--;
 		}else agent_direction = 3;
-		this.lastTurn = this.ACTION_TURN_LEFT;
 		agent_last_action = ACTION_TURN_LEFT;
 		return LIUVacuumEnvironment.ACTION_TURN_LEFT;
 	}
@@ -179,35 +178,7 @@ class MyAgentState2 {
 		agent_last_action = ACTION_MOVE_FORWARD;
 		return LIUVacuumEnvironment.ACTION_MOVE_FORWARD;
 	}
-	
-	public int getLastTurn(){
-		return this.lastTurn;
-	}
-	
-	public List getNextPosition(int direction){
-		int nextX = agent_x_position;
-		int nextY = agent_y_position;
 
-		switch (agent_direction) {
-		case MyAgentState.NORTH:
-			nextY--;
-			break;
-		case MyAgentState.EAST:
-			nextX++;
-			break;
-		case MyAgentState.SOUTH:
-			nextY++;
-			break;
-		case MyAgentState.WEST:
-			nextX--;
-			break;
-		}
-		List<Integer> list = new ArrayList();
-		list.add(nextX);
-		list.add(nextY);
-		return list;
-	}
-	
 	public List<Integer> getLastPosition(){
 		return savedPositions.get(savedPositions.size() - 1);
 	}
