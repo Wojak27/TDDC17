@@ -1,0 +1,6 @@
+(use-door-wide agent sq-1-2 sq-1-1)
+(use-door-wide agent sq-1-2 sq-1-3)
+(take-box agent the-box sq-1-1)
+(switch agent sq-1-3 the-box the-gold)
+(take-gold agent sq-1-3 the-gold the-gold)
+; cost = 5 (unit cost)
