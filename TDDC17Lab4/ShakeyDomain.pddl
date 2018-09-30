@@ -16,47 +16,50 @@
    (switch2 ?where)
    (switch3 ?where))
 
-
+; turns on the switch in a given room
   (:action switch 
     	:parameters (?who ?where ?what ?switch-on)
     	:precondition (and (is-agent ?who)
 		       	(at ?who ?where)
-			(not(is-turned-on ?switch-on ?where))
-			(at ?switch-on ?where)
-			(have ?who ?what))
-    	:effect  (and (is-turned-on ?switch-on ?where))
+			(not(is-turned-on ?switch-on ?where)) ; check if the light is on or not
+			(at ?switch-on ?where) ;check if the switch is in the same room as agent
+			(have ?who ?what)) ;check if the agent has the box
+    	:effect  (and (is-turned-on ?switch-on ?where)) ;return switch turned on in a given room
 )
 
+;takes the box in a given room
   (:action take-box
 	:parameters (?who ?what ?where)
     	:precondition (and (is-agent ?who)
 			(is-box ?what)
-		       	(at ?who ?where)
-			(at ?what ?where)
-		       	(not (have ?who ?what)))
-    	:effect	(and (not (at ?what ?where))
+		       	(at ?who ?where) 
+			(at ?what ?where) ;check if the box is in the same room as the agent
+		       	(not (have ?who ?what))) ;check if the agent has the box
+    	:effect	(and (not (at ?what ?where)) ; return agent has the box as well as the box is no longer in the room
 			(have ?who ?what)
 	)
 )
 
+;use a wide door
   (:action use-door-wide
 	:parameters (?who ?where ?to)
 	:precondition (and (is-agent ?who)
-			 (adj ?where ?to)
-			 (at ?who ?where))
-	:effect		(and (not(at ?who ?where))
+			 (adj ?where ?to) ;check if this move is possible
+			)
+	:effect		(and (not(at ?who ?where)) ;return agent not in the previous position and in the new one
 				(at ?who ?to)
 	)
 )
 
+;take gold in a give room
   (:action take-gold
 	:parameters (?who ?where ?what ?switch)
 	:precondition (and (is-agent ?who)
-			 (is-gold ?what)
+			 (is-gold ?what) ; check if ?what is the gold
 			 (at ?who ?where)
-			 (at ?what ?where)
-			 (is-turned-on ?switch ?where))
-	:effect		(and (not(at ?what ?where)) (have ?who ?what))
+			 (at ?what ?where) ;check if the agent is in the same room as the agent
+			 (is-turned-on ?switch ?where)) ;check if the switch is turned on
+	:effect		(and (not(at ?what ?where)) (have ?who ?what)) ; return agent has the gold and the gold is not in the room
 )
 			
 

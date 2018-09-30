@@ -18,5 +18,5 @@
 	 (not(is-turned-on switch sq-1-3))
 	
 )
-  (:goal (and (have agent the-box) (have agent the-gold) ))
+  (:goal (and (have agent the-gold) ))
   )
