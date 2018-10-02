@@ -1,12 +1,28 @@
 public class StateAndReward {
 
 	
+	//returns a double rounded to two decimals (needed write own funtion for that... thanks obama)
+	private static double round(double num){
+		double rounded = 100;
+		rounded *= num;
+		rounded = Math.round(rounded);
+		rounded = rounded /100;
+		return rounded;
+	}
+	
 	/* State discretization function for the angle controller */
 	public static String getStateAngle(double angle, double vx, double vy) {
 
 		/* TODO: IMPLEMENT THIS FUNCTION */
-
-		String state = "OneStateToRuleThemAll";
+		String state;
+		angle = round(angle);					// karol
+		if(angle==0 && vy<0){
+			state = "Just right!";
+		}else if(angle<0){
+			state = "Tipping left!";
+		}else{
+			state = "Tipping right!";
+		}
 		
 		return state;
 	}
@@ -15,8 +31,11 @@ public class StateAndReward {
 	public static double getRewardAngle(double angle, double vx, double vy) {
 
 		/* TODO: IMPLEMENT THIS FUNCTION */
-		
-		double reward = 0;
+		angle = round(angle);
+		if(angle == 0){
+			return 100;
+		}
+		double reward = angle < 0 ? angle : -angle; //karol
 
 		return reward;
 	}

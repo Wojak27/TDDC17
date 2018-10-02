@@ -3,6 +3,7 @@ import java.text.NumberFormat;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /* TODO: 
  * -Define state and reward functions (StateAndReward.java) suitable for your problem 
@@ -24,7 +25,7 @@ public class QLearningController extends Controller {
 	RocketEngine middleEngine;
 	RocketEngine rightEngine;
 
-	final static int NUM_ACTIONS = 7; /* The takeAction function must be changed if this is modified */
+	final static int NUM_ACTIONS = 5; /* The takeAction function must be changed if this is modified */
 	
 	/* Keep track of the previous state and action */
 	String previous_state = null;
@@ -41,7 +42,7 @@ public class QLearningController extends Controller {
 	static final double GAMMA_DISCOUNT_FACTOR = 0.95; /* Must be < 1, small values make it very greedy */
 	static final double LEARNING_RATE_CONSTANT = 10; /* See alpha(), lower values are good for quick results in large and deterministic state spaces */
 	double explore_chance = 0.5; /* The exploration chance during the exploration phase */
-	final static int REPEAT_ACTION_MAX = 30; /* Repeat selected action at most this many times trying reach a new state, without a max it could loop forever if the action cannot lead to a new state */
+	final static int REPEAT_ACTION_MAX = 5; /* Repeat selected action at most this many times trying reach a new state, without a max it could loop forever if the action cannot lead to a new state */
 
 	/* Some internal counters */
 	int iteration = 0; /* Keeps track of how many iterations the agent has run */
@@ -84,11 +85,38 @@ public class QLearningController extends Controller {
 
 	/* Performs the chosen action */
 	void performAction(int action) {
-
-		/* Fire zeh rockets! */
-		/* TODO: Remember to change NUM_ACTIONS constant to reflect the number of actions (including 0, no action) */
 		
-		/* TODO: IMPLEMENT THIS FUNCTION */
+		//perform action
+		switch(action){
+		case(0):
+			//do nothing:
+			break;
+		case(1):
+			//turn on left engine
+			leftEngine.setBursting(true);
+			break;
+		case(2):
+			//turn the left engine
+			leftEngine.setBursting(false);
+			break;
+		case(3):
+			//turn on right engine
+			rightEngine.setBursting(true);
+			break;
+		case(4):
+			//turn off right engine
+			rightEngine.setBursting(false);
+			break;
+		
+		case(5):
+			//turn on middle engine
+			middleEngine.setBursting(true);
+			break;
+		case(6):
+			//turn off middle engine
+			middleEngine.setBursting(false);
+			break;
+		}
 		
 	}
 
@@ -122,15 +150,25 @@ public class QLearningController extends Controller {
 				if (Qtable.get(prev_stateaction) == null) {
 					Qtable.put(prev_stateaction, 0.0);
 				} 
-
+				//static final double GAMMA_DISCOUNT_FACTOR = 0.95; /* Must be < 1, small values make it very greedy */
+				//static final double LEARNING_RATE_CONSTANT = 10; /* See alpha(), lower values are good for quick results in large and deterministic state spaces */
+				//shortenning values for the algorithm
+				double r = previous_reward; 
+				final double discountF = GAMMA_DISCOUNT_FACTOR;
+				//final double lRate = LEARNING_RATE_CONSTANT;
+				double alpha = alpha(Ntable.get(prev_stateaction));
+				
+				//taken from wikipedia
+				double Q_value = (1-alpha)*Qtable.get(prev_stateaction) + alpha*(r + discountF*getMaxActionQValue(new_state));
+				Qtable.put(prev_stateaction, Q_value);
 				
 				/* TODO: IMPLEMENT Q-UPDATE HERE! */
+				
 				
 				/* See top for constants and below for helper functions */
 				
 				
 				int action = selectAction(new_state); /* Make sure you understand how it selects an action */
-
 				performAction(action);
 				
 				/* Only print every 10th line to reduce spam */
@@ -182,7 +220,6 @@ public class QLearningController extends Controller {
 	/* Selects an action in a state based on the registered Q-values and the exploration chance */
 	public int selectAction(String state) {
 		Random rand = new Random();
-
 		int action = 0;
 		/* May do exploratory move if in exploration mode */
 		if (explore && Math.abs(rand.nextDouble()) < explore_chance) {

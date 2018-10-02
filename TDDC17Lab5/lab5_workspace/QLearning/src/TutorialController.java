@@ -14,7 +14,7 @@ public class TutorialController extends Controller {
 	DoubleFeature vy;
 	DoubleFeature angle; /* Angle */
 	String[] nameList = {"x","y", "vx", "vy", "angle"};
-	DoubleFeature[] featureList = {x,y,vx, vy, angle};
+	DoubleFeature[] featureList = new DoubleFeature[5];
 	
 
     /* Example:
@@ -33,11 +33,11 @@ public class TutorialController extends Controller {
 	public void init() {
 		System.out.println("hello");
 		cso = (ComposedSpringObject) object;
-		x = (DoubleFeature) cso.getObjectById("x");
-		y = (DoubleFeature) cso.getObjectById("y");
-		vx = (DoubleFeature) cso.getObjectById("vx");
-		vy = (DoubleFeature) cso.getObjectById("vy");
-		angle = (DoubleFeature) cso.getObjectById("angle");
+		featureList[0] = (DoubleFeature) cso.getObjectById("x");
+		featureList[1] = (DoubleFeature) cso.getObjectById("y");
+		featureList[2] = (DoubleFeature) cso.getObjectById("vx");
+		featureList[3] = (DoubleFeature) cso.getObjectById("vy");
+		featureList[4] = (DoubleFeature) cso.getObjectById("angle");
 
 		leftRocket = (RocketEngine) cso.getObjectById("rocket_engine_left");
 		rightRocket = (RocketEngine) cso.getObjectById("rocket_engine_right");
