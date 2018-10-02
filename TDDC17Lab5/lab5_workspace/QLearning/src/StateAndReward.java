@@ -16,8 +16,10 @@ public class StateAndReward {
 		/* TODO: IMPLEMENT THIS FUNCTION */
 		String state;
 		angle = round(angle);					// karol
-		if(angle==0 && vy<0){
-			state = "Just right!";
+		if(Math.abs(angle) < 0.2 && vy<1 && vy>-5){
+			if(Math.abs(vy) < 0.1) state = "Perfect!";
+			else if(vy >-2) state = "almost there";
+			state = "Just right angle!";
 		}else if(angle<0){
 			state = "Tipping left!";
 		}else{
@@ -32,8 +34,10 @@ public class StateAndReward {
 
 		/* TODO: IMPLEMENT THIS FUNCTION */
 		angle = round(angle);
-		if(angle == 0){
-			return 100;
+		if(Math.abs(angle) < 0.2 && vy<1 && vy>-5){
+			if(Math.abs(vy) < 0.1) return 100;
+			else if(vy >-2) return (10 + vy);
+			return 1;
 		}
 		double reward = angle < 0 ? angle : -angle; //karol
 
