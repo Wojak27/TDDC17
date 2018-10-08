@@ -21,7 +21,7 @@ public class StateAndReward {
 		}else
 		if(Math.abs(angle) < 0.2 && vy<1 && vy>-5){
 			if(Math.abs(vy) < 0.1) state = "Perfect!";
-			else if(vy >-2) state = "almost there";
+			else if(vy >-2) state = "Almost there";
 			else state = "Just right angle!";
 		}else if(angle<0){
 			state = "Tipping left!";
@@ -53,24 +53,26 @@ public class StateAndReward {
 	public static String getStateHover(double angle, double vx, double vy) {
 		angle = round(angle);
 		
-		if(Math.abs(angle) < 0.1)  return "Nice angle! "+getStateVel(angle, vx, vy);
-		else if (Math.abs(angle) < 0.3)  return "Very good angle! " +getStateVel(angle, vx, vy);
-		else if (Math.abs(angle) < 0.5)  return "good angle! "+getStateVel(angle, vx, vy);
+		if (Math.abs(angle) == 0) return "Perfect angle! "+getStateVel(angle, vx, vy);
+		else if (Math.abs(angle) < 0.1)  return "Nice angle! "+getStateVel(angle, vx, vy);
+		else if (Math.abs(angle) < 0.3)  return "Good angle! " +getStateVel(angle, vx, vy);
+		else if (Math.abs(angle) < 0.5)  return "Decent angle! "+getStateVel(angle, vx, vy);
 		else if (Math.abs(angle) < 0.7)  return "Okay angle! " +getStateVel(angle, vx, vy);
-		else if (Math.abs(angle) < 1)  return "decent angle! " +getStateVel(angle, vx, vy);
-		else return "Totaly wrong angle! "+getStateVel(angle, vx, vy);
+		else if (Math.abs(angle) < 1)  return "Wrong angle! " +getStateVel(angle, vx, vy);
+		else return "Terrible angle! "+getStateVel(angle, vx, vy);
 		
 	}
 	
 	public static String getStateVel(double angle, double vx, double vy) {
 		angle = round(angle);
 		
-		if(Math.abs(vy) < 0.1)  return "Nice vel!";
-		else if (Math.abs(vy) < 0.5)  return "Very good vel!";
-		else if (Math.abs(vy) < 1)  return "good wrong vel!";
-		else if (Math.abs(vy) < 2)  return "Okay wrong vel!";
-		else if (Math.abs(vy) < 3)  return "decent wrong vel!";
-		else return "Totaly wrong vel!";
+		if (Math.abs(vy) == 0) return "Perfect vel!";
+		else if (Math.abs(vy) < 0.1)  return "Nice vel!";
+		else if (Math.abs(vy) < 0.5)  return "Good vel!";
+		else if (Math.abs(vy) < 1)  return "Decent vel!";
+		else if (Math.abs(vy) < 2)  return "Okay vel!";
+		else if (Math.abs(vy) < 3)  return "Wrong vel!";
+		else return "Terrible vel!";
 		
 	}
 

@@ -107,7 +107,6 @@ public class QLearningController extends Controller {
 			//turn off right engine
 			rightEngine.setBursting(false);
 			break;
-		
 		case(5):
 			//turn on middle engine
 			middleEngine.setBursting(true);
@@ -179,7 +178,6 @@ public class QLearningController extends Controller {
 							" P_REWARD: " + df.format(previous_reward) + " P_QVAL: " + df.format(Qtable.get(prev_stateaction)) + " Tested: "
 							+ Ntable.get(prev_stateaction) + " times.");
 				}
-				
 				previous_vy = vy.getValue();
 				previous_vx = vx.getValue();
 				previous_angle = angle.getValue();
