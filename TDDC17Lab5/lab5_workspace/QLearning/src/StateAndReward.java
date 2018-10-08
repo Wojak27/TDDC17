@@ -80,21 +80,28 @@ public class StateAndReward {
 	public static double getRewardHover(double angle, double vx, double vy) {
 		double rewardVel = 0;
 		double rewardAng = 0;
-		double alpha = 4;
+		double alpha = 1; //was 4
 		double beta = 1;
 		angle = round(angle);
 		if (Math.abs(angle) < 1){
-			rewardAng = (Math.pow((Math.PI-Math.abs(angle)),2));
+			//We need to differentiate more between very good and decent angles
+			rewardAng = (Math.pow((Math.PI-Math.abs(angle*3)),10)); //Added arbitrary constant 3 (angle will maximally be 2.9999999...) and power 4.
+			//The arbitrary constant 3 makes sure that 0*3 = 0 which returns 3.14^4, but if its close to 1 then it's going to be 1*3 = 3 which returns 0.14^4.
+			//So for angles close to 1 the reward value is going to be vastly smaller (But positive!). For instance angle 0.7 is going to return (3.14-3*0.7)^4 = 1.04^4 ~= 1.
+			//For angles close to 0 the reward value is going to be high. It returns (3.14 - 0*3) ^ 4 ~= 97.2.
 		}else rewardAng = -100;
 		
-		rewardVel = estimateVelocityReweward(vx, vy);
+		rewardVel = estimateVelocityReward(vx, vy);
 		
 		return rewardVel*alpha + rewardAng*beta;
 	}
 	
-	private static double estimateVelocityReweward(double vx, double vy){
-		// Three states
-		return (3-Math.abs(vy));
+	private static double estimateVelocityReward(double vx, double vy){
+		final double someConstant = 3; //Arbitrary constant that will punish higher velocities than this.
+		double decentValue = someConstant - Math.abs(vy); //We don't care about vx in the end since angle will compensate for it.
+		if (decentValue > 0){ //The velocity was less than someConstant (3) so we reward the rocket for it.
+			return Math.pow(decentValue, 5); //Amplify the reward by using power of 5. Note that we care less about velocity than angle, so we want angle to be more important.
+		} else return -100;
 	}
 
 	// ///////////////////////////////////////////////////////////
