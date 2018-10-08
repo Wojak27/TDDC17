@@ -13,95 +13,82 @@ public class StateAndReward {
 	/* State discretization function for the angle controller */
 	public static String getStateAngle(double angle, double vx, double vy) {
 
-		/* TODO: IMPLEMENT THIS FUNCTION */
-		String state;
-		angle = round(angle);					// karol
-		if(Math.abs(angle) > 1){
-			state = "Wrong angle!";
-		}else
-		if(Math.abs(angle) < 0.2 && vy<1 && vy>-5){
-			if(Math.abs(vy) < 0.1) state = "Perfect!";
-			else if(vy >-2) state = "Almost there";
-			else state = "Just right angle!";
-		}else if(angle<0){
-			state = "Tipping left!";
-		}else{
-			state = "Tipping right!";
-		}
+		angle = round(angle);	// karol
+		double pi = Math.PI;
 		
-		return state;
+		if(Math.abs(angle) < 0.3)return "Going up";
+		else if(angle <= -0.3 && angle > -pi)return "Going left";
+		else return "Going right";
+		
 	}
 
 	/* Reward function for the angle controller */
 	public static double getRewardAngle(double angle, double vx, double vy) {
 
-		/* TODO: IMPLEMENT THIS FUNCTION */
-		angle = round(angle);
-		if(Math.abs(angle) > 1){
-			return -100;
-		}else if(Math.abs(angle) < 0.2 && vy<1 && vy>-5){
-			if(Math.abs(vy) < 0.1) return 100;
-			else if(vy >-2) return (10 - vy);
-			return 2;
-		}
-		double reward = angle < 0 ? angle : -angle; //karol
-
-		return reward;
+		angle = round(angle);					// karol
+		double pi = Math.PI;
+		
+		if(Math.abs(angle) < 0.3)return 1;
+		else return -1;
 	}
 
 	/* State discretization function for the full hover controller */
 	public static String getStateHover(double angle, double vx, double vy) {
 		angle = round(angle);
-		
-		if (Math.abs(angle) == 0) return "Perfect angle! "+getStateVel(angle, vx, vy);
-		else if (Math.abs(angle) < 0.1)  return "Nice angle! "+getStateVel(angle, vx, vy);
-		else if (Math.abs(angle) < 0.3)  return "Good angle! " +getStateVel(angle, vx, vy);
-		else if (Math.abs(angle) < 0.5)  return "Decent angle! "+getStateVel(angle, vx, vy);
-		else if (Math.abs(angle) < 0.7)  return "Okay angle! " +getStateVel(angle, vx, vy);
-		else if (Math.abs(angle) < 1)  return "Wrong angle! " +getStateVel(angle, vx, vy);
-		else return "Terrible angle! "+getStateVel(angle, vx, vy);
+
+		String stateAngle = getStateAngle(angle,vx,vy);
+		String stateVel = getStateVel(angle, vx, vy);
+		String stateXV = getStateXV(vx);
+		return stateAngle + stateVel + stateXV;
 		
 	}
 	
-	public static String getStateVel(double angle, double vx, double vy) {
-		angle = round(angle);
+	private static String getStateXV(double vx) {
+		vx = round(vx);
 		
-		if (Math.abs(vy) == 0) return "Perfect vel!";
-		else if (Math.abs(vy) < 0.1)  return "Nice vel!";
-		else if (Math.abs(vy) < 0.5)  return "Good vel!";
-		else if (Math.abs(vy) < 1)  return "Decent vel!";
-		else if (Math.abs(vy) < 2)  return "Okay vel!";
-		else if (Math.abs(vy) < 3)  return "Wrong vel!";
-		else return "Terrible vel!";
+		if(Math.abs(vx) < 0.3)return "nice Speed";
+		else if(Math.abs(vx)>= 0.3 && Math.abs(vx)< 3)return "too much";
+		else return "Totaly wrong";
+	}
+
+	public static String getStateVel(double angle, double vx, double vy) {
+
+		vy = round(vy);
+		if(Math.abs(vy) < 0.3)return "nice Speed";
+		else if(Math.abs(vy)>= 0.3 && Math.abs(vy)< 3)return "too much";
+		else return "Totaly wrong";
 		
 	}
 
 	/* Reward function for the full hover controller */
 	public static double getRewardHover(double angle, double vx, double vy) {
-		double rewardVel = 0;
-		double rewardAng = 0;
-		double alpha = 1; //was 4
-		double beta = 1;
+		
+		double alpha = 2; //was 4
+		double beta = 5;
+		double theta = 1;
 		angle = round(angle);
-		if (Math.abs(angle) < 1){
-			//We need to differentiate more between very good and decent angles
-			rewardAng = (Math.pow((Math.PI-Math.abs(angle*3)),10)); //Added arbitrary constant 3 (angle will maximally be 2.9999999...) and power 4.
-			//The arbitrary constant 3 makes sure that 0*3 = 0 which returns 3.14^4, but if its close to 1 then it's going to be 1*3 = 3 which returns 0.14^4.
-			//So for angles close to 1 the reward value is going to be vastly smaller (But positive!). For instance angle 0.7 is going to return (3.14-3*0.7)^4 = 1.04^4 ~= 1.
-			//For angles close to 0 the reward value is going to be high. It returns (3.14 - 0*3) ^ 4 ~= 97.2.
-		}else rewardAng = -100;
 		
-		rewardVel = estimateVelocityReward(vx, vy);
+		double rewardAng = getRewardAngle(angle, vx, vy);
+		double rewardVelSide = getRewardXV(vx);
+		double rewardVelUp = estimateVelocityReward(vx, vy);
 		
-		return rewardVel*alpha + rewardAng*beta;
+		return rewardVelUp*alpha + rewardAng*beta + theta*rewardVelSide;
 	}
 	
+	private static double getRewardXV(double vx) {
+		vx = round(vx);
+		
+		if(Math.abs(vx) < 1)return 1;
+		else if(Math.abs(vx)>= 1 && Math.abs(vx)< 2)return -0.5;
+		else return -1;
+	}
+
 	private static double estimateVelocityReward(double vx, double vy){
-		final double someConstant = 3; //Arbitrary constant that will punish higher velocities than this.
-		double decentValue = someConstant - Math.abs(vy); //We don't care about vx in the end since angle will compensate for it.
-		if (decentValue > 0){ //The velocity was less than someConstant (3) so we reward the rocket for it.
-			return Math.pow(decentValue, 5); //Amplify the reward by using power of 5. Note that we care less about velocity than angle, so we want angle to be more important.
-		} else return -100;
+		vy = round(vy);
+		
+		if(Math.abs(vy) < 0.3)return 1;
+		else if(Math.abs(vy)>= 0.3 && Math.abs(vy)< 1)return -0.5;
+		else return -1;
 	}
 
 	// ///////////////////////////////////////////////////////////

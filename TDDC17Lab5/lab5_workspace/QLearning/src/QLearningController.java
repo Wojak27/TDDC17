@@ -25,7 +25,7 @@ public class QLearningController extends Controller {
 	RocketEngine middleEngine;
 	RocketEngine rightEngine;
 
-	final static int NUM_ACTIONS = 7; /* The takeAction function must be changed if this is modified */
+	final static int NUM_ACTIONS = 5; /* The takeAction function must be changed if this is modified */
 	
 	/* Keep track of the previous state and action */
 	String previous_state = null;
@@ -39,7 +39,7 @@ public class QLearningController extends Controller {
 	Hashtable<String, Integer> Ntable = new Hashtable<String, Integer>(); /* Keeps track of how many times each state-action combination has been used */
 
 	/* PARAMETERS OF THE LEARNING ALGORITHM - THESE MAY BE TUNED BUT THE DEFAULT VALUES OFTEN WORK REASONABLY WELL  */
-	static final double GAMMA_DISCOUNT_FACTOR = 0.95; /* Must be < 1, small values make it very greedy */
+	static final double GAMMA_DISCOUNT_FACTOR = 0.6; /* Must be < 1, small values make it very greedy */
 	static final double LEARNING_RATE_CONSTANT = 10; /* See alpha(), lower values are good for quick results in large and deterministic state spaces */
 	double explore_chance = 0.5; /* The exploration chance during the exploration phase */
 	final static int REPEAT_ACTION_MAX = 5; /* Repeat selected action at most this many times trying reach a new state, without a max it could loop forever if the action cannot lead to a new state */
@@ -94,25 +94,21 @@ public class QLearningController extends Controller {
 		case(1):
 			//turn on left engine
 			leftEngine.setBursting(true);
+			middleEngine.setBursting(true);
 			break;
 		case(2):
 			//turn the left engine
 			leftEngine.setBursting(false);
+			middleEngine.setBursting(false);
 			break;
 		case(3):
 			//turn on right engine
 			rightEngine.setBursting(true);
+			middleEngine.setBursting(true);
 			break;
 		case(4):
 			//turn off right engine
 			rightEngine.setBursting(false);
-			break;
-		case(5):
-			//turn on middle engine
-			middleEngine.setBursting(true);
-			break;
-		case(6):
-			//turn off middle engine
 			middleEngine.setBursting(false);
 			break;
 		}
@@ -158,7 +154,10 @@ public class QLearningController extends Controller {
 				double alpha = alpha(Ntable.get(prev_stateaction));
 				
 				//taken from wikipedia
-				double Q_value = (1-alpha)*Qtable.get(prev_stateaction) + alpha*(r + discountF*getMaxActionQValue(new_state));
+				//double Q_value = (1-alpha)*Qtable.get(prev_stateaction) + alpha*(r + discountF*getMaxActionQValue(new_state));
+				double Q_value = Qtable.get(prev_stateaction) + alpha(Ntable.get(prev_stateaction))*
+						(previous_reward + GAMMA_DISCOUNT_FACTOR*getMaxActionQValue(new_state) - Qtable.get(prev_stateaction));
+				
 				Qtable.put(prev_stateaction, Q_value);
 				
 				/* TODO: IMPLEMENT Q-UPDATE HERE! */
