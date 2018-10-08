@@ -25,7 +25,7 @@ public class QLearningController extends Controller {
 	RocketEngine middleEngine;
 	RocketEngine rightEngine;
 
-	final static int NUM_ACTIONS = 7; /* The takeAction function must be changed if this is modified */
+	final static int NUM_ACTIONS = 4; /* The takeAction function must be changed if this is modified */
 	
 	/* Keep track of the previous state and action */
 	String previous_state = null;
@@ -42,7 +42,7 @@ public class QLearningController extends Controller {
 	static final double GAMMA_DISCOUNT_FACTOR = 0.95; /* Must be < 1, small values make it very greedy */
 	static final double LEARNING_RATE_CONSTANT = 10; /* See alpha(), lower values are good for quick results in large and deterministic state spaces */
 	double explore_chance = 0.5; /* The exploration chance during the exploration phase */
-	final static int REPEAT_ACTION_MAX = 5; /* Repeat selected action at most this many times trying reach a new state, without a max it could loop forever if the action cannot lead to a new state */
+	final static int REPEAT_ACTION_MAX = 10; /* Repeat selected action at most this many times trying reach a new state, without a max it could loop forever if the action cannot lead to a new state */
 
 	/* Some internal counters */
 	int iteration = 0; /* Keeps track of how many iterations the agent has run */
@@ -87,6 +87,7 @@ public class QLearningController extends Controller {
 	void performAction(int action) {
 		
 		//perform action
+		resetRockets();
 		switch(action){
 		case(0):
 			//do nothing:
@@ -96,25 +97,25 @@ public class QLearningController extends Controller {
 			leftEngine.setBursting(true);
 			break;
 		case(2):
-			//turn the left engine
-			leftEngine.setBursting(false);
-			break;
-		case(3):
 			//turn on right engine
 			rightEngine.setBursting(true);
 			break;
-		case(4):
-			//turn off right engine
-			rightEngine.setBursting(false);
-			break;
-		case(5):
+		case(3):
 			//turn on middle engine
 			middleEngine.setBursting(true);
+			break;
+		/*case(4):
+			//turn off left engine
+			leftEngine.setBursting(false);
+			break;
+		case(5):
+			//turn off right engine
+			rightEngine.setBursting(false);
 			break;
 		case(6):
 			//turn off middle engine
 			middleEngine.setBursting(false);
-			break;
+			break;*/
 		}
 		
 	}
@@ -149,9 +150,7 @@ public class QLearningController extends Controller {
 				if (Qtable.get(prev_stateaction) == null) {
 					Qtable.put(prev_stateaction, 0.0);
 				} 
-				//static final double GAMMA_DISCOUNT_FACTOR = 0.95; /* Must be < 1, small values make it very greedy */
-				//static final double LEARNING_RATE_CONSTANT = 10; /* See alpha(), lower values are good for quick results in large and deterministic state spaces */
-				//shortenning values for the algorithm
+				//shortening values for the algorithm
 				double r = previous_reward; 
 				final double discountF = GAMMA_DISCOUNT_FACTOR;
 				//final double lRate = LEARNING_RATE_CONSTANT;
