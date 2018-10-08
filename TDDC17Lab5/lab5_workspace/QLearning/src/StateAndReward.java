@@ -1,7 +1,7 @@
 public class StateAndReward {
 
 	/*** Daniels notes:
-	I spent my whole monday (8th october) figuring this sh*t out. From 8:15 in the morning to 02:00 at night, almost nonstop save for eating and grocery shopping.
+	I spent my whole monday (8th october) figuring this sh*t out.
 	I feel like I need to write this to summarize what I have been doing during the day.
 	
 	I got stuck with a rocket that kept either rotating infinitely and never converging on a "good enough" angle, or a rocket that converged on a good angle but
@@ -44,7 +44,7 @@ public class StateAndReward {
 		if (angle > MAXIMUM_ANGLE || angle < MINIMUM_ANGLE){ //I guess absolute number could work here as well perhaps, but only as long as max and min are defined as equals.
 			return 0; //We have a really bad angle close to abs(3.14).
 		} else {
-			return Math.pow((1 - Math.abs(angle)/MAXIMUM_ANGLE), 2); //Need to normalize angle to work with 1, e.g. an angle value of 1 would return (1 - 1/2) = 0.5
+			return Math.pow((1 - Math.abs(angle)/MAXIMUM_ANGLE), 2); //Need to normalize angle to work with 1, e.g. an angle value of 1 would return (1 - 1/3) = 0.667
 		}
 	}
 	
