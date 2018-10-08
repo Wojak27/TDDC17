@@ -16,8 +16,8 @@ public class StateAndReward {
 	It suggests using discretization to the right extent (don't overdo it) to give a better Q-table of states and actions. In the paper it groups movements as straight N/E/S/W moves,
 	as opposed to a 360 degree movement range. Seeing as there is support for discretization here, the decision was made to re-write the code and grossly group sets of angles
 	into bunched groups. I figured I'd try a pie chart of 10 pieces to begin with. Reading the discretization code, it gives you a discretization interval of even pieces
-	in the area of MIN to MAX (according to the documentation at least), e.g. angles -3.0 to 3.0 would generate -3.0 -> -2.4, -2.4 -> -1.8 up to 2.4 -> 3.0 using 10 pieces. 
-	This would mean that pieces 5 and 6 would be the "best" ones to be in (4 and 5 with 0-indexation), with the perfect state being on the border between both of them. 
+	in the area of MIN to MAX (according to the documentation at least), e.g. angles -3.0 to 3.0 would generate -3.0 -> -2.4, -2.4 -> -1.8 and so on, up to 2.4 -> 3.0 using 10 pieces. 
+	This would mean that pieces no. 5 and 6 would be the "best" ones to be in (4 and 5 with 0-indexation), with the perfect state being on the border between both of them. 
 	The "real" min/max angle values are -3.14 and 3.14.
 	
 	Moreover, the VY variable was discretized the same way. The default speed when the rocket is free falling is vy = 5. Figuring that we don't desire that kind of speed the maximum was set
